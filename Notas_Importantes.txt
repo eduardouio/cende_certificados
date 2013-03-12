@@ -11,6 +11,9 @@
   	REFERENCES `cendendt_certificados2`.`clientes` (`Id_Cliente` )
   	ON DELETE CASCADE
   	ON UPDATE CASCADE;
+  	
+  	Notas fuera de funcionamientio
+  	
 
 
 
