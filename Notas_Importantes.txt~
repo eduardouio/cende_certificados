@@ -1,0 +1,77 @@
+1.- Cambiar la configuracion de develop a produccion en index.php
+1a. cambiar el debug a false en database para no mostrar errores de bases de datos
+2.- Cambiar a modelo en cascada los delete y update solamente para la tabla de cientes y clientes certificados
+	no cambiar la relacion entre certificados y clientes certificados, cambiar las condiciones de un solo lado
+	poque si se le ocurre borrar un certificado, todoslos clientes lo pierden
+
+	ALTER TABLE `cendendt_certificados2`.`clientes_certificados` DROP FOREIGN KEY `clientes_certificados_ibfk_1` ;
+	ALTER TABLE `cendendt_certificados2`.`clientes_certificados` 
+  	ADD CONSTRAINT `clientes_certificados_ibfk_1`
+  	FOREIGN KEY (`Id_Cliente` )
+  	REFERENCES `cendendt_certificados2`.`clientes` (`Id_Cliente` )
+  	ON DELETE CASCADE
+  	ON UPDATE CASCADE;
+
+
+
+3.- cambiar el nombre de las clumnas fecha_vencimiento y fecha_certificacion de la tabla clietes certificados
+	Las dos están mas escritas :)
+
+	ALTER TABLE `cendendt_certificados2`.`clientes_certificados` CHANGE COLUMN `Fecha_Certificaion` `Fecha_Certificacion` DATE NOT NULL  , CHANGE COLUMN `Fecha_Vencemiento` `Fecha_Vencimiento` DATE NOT NULL  ;
+
+
+4.- Agrega una columna como pk autonumérico en la tabla de clientes certificados, para que la columna de os codigos CEN-590
+	funcione como quiere el cliente, ellos manejan esos códigos, la clumna actua ya no queda como PK 
+
+5.- crear una vista para las certificaciones con el siguiente código
+
+		create view v_certificaciones as
+			SELECT  
+			cc.id_cc, cc.id_registro, cc.edision,cc.fecha_certificacion,cc.fecha_vencimiento,cc.estado_examen, 
+			cert.id_certificado, cert.codigo,
+			cli.id_cliente,cli.profesion,cli.cedula,cli.nombres,cli.apellidos
+			FROM
+			clientes as cli, tipos_de_certificados as cert ,clientes_certificados as cc
+			WHERE
+			(cli.id_cliente = cc.id_cliente)
+			AND
+			(cert.id_certificado = cc.id_certificado)
+			ORDER BY cc.id_cc;
+6.- verificar que la columna nivel de la tabla certificados esté eliminada
+7.- crear una tabla para el manejo de sesiones (la libreria ya fue cargada en el desarrollo)
+	create table ci_sessions(
+		session_id varchar(40) default 0 not null,
+		ip_address varchar(16) default 0 not null,
+		user_agent varchar(50) not null,
+		last_activity varchar(10) default 0 not null,
+		user_data text default '' not null,
+		fecha timestamp not null default current_timestamp,
+		primary key(session_id)
+		)engine=innodb;
+
+	--crear un disparador que almacene la informacin que se inserta en la tabla de arriba
+	-- el dsiparador debe estar presente para el insert y el update
+	create trigger t_ci_sessions in ci_sessions on insert as
+		begin
+			inser into ci_sessions_espejo 
+			values(
+				new.session_id,
+				new.ip_address,
+				new.user_agent,
+				new.
+
+				)
+
+		end
+
+	--tabla para el duplicado de las sesiones
+	create table ci_sessions_espejo(
+		session_id varchar(40) default 0 not null,
+		ip_address varchar(16) default 0 not null,
+		user_agent varchar(50) not null,
+		last_activity varchar(10) default 0 not null,		
+		user_data text default '' not null,
+		creacion datetime not null,
+		modificacion timestamp not null default current_timestamp on update current_timestamp,
+		primary key(session_id)
+		)engine=innodb;
